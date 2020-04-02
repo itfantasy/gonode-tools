@@ -1,86 +1,85 @@
-package stl_gen
+package dicts
 
 import (
-	"errors"
 	"sync"
 )
 
-type Dictionary<K,V> struct {
+type Dict<K,V> struct {
 	_map map[<K>]<V>
 	sync.RWMutex
 }
 
-func NewDictionary<K,V>() *Dictionary<K,V> {
-	dict := Dictionary<K,V>{}
+func NewDict<K,V>() *Dict<K,V> {
+	dict := Dict<K,V>{}
 	dict._map = make(map[<K>]<V>)
 	return &dict
 }
 
-func NewDictionary<K,V>Raw(raw map[<K>]<V>) *Dictionary<K,V> {
-	dict := Dictionary<K,V>{}
+func NewDict<K,V>Raw(raw map[<K>]<V>) *Dict<K,V> {
+	dict := Dict<K,V>{}
 	dict._map = raw
 	return &dict
 }
 
-func (h *Dictionary<K,V>) Add(key <K>, value <V>) error {
-	h.Lock()
-	defer h.Unlock()
+func (d *Dict<K,V>) Add(key <K>, value <V>) bool {
+	d.Lock()
+	defer d.Unlock()
 
-	_, exist := h._map[key]
+	_, exist := d._map[key]
 	if exist {
-		return errors.New("Has Contains The Same Key!")
+		return false
 	}
-	h._map[key] = value
-	return nil
+	d._map[key] = value
+	return true
 }
 
-func (h *Dictionary<K,V>) Remove(key <K>) error {
-	h.Lock()
-	defer h.Unlock()
+func (d *Dict<K,V>) Remove(key <K>) bool {
+	d.Lock()
+	defer d.Unlock()
 
-	_, exist := h._map[key]
+	_, exist := d._map[key]
 	if exist {
-		delete(h._map, key)
-		return nil
+		delete(d._map, key)
+		return true
 	}
-	return errors.New("Do Not Has The Key!")
+	return false
 }
 
-func (h *Dictionary<K,V>) Set(key <K>, value <V>) {
-	h.Lock()
-	defer h.Unlock()
+func (d *Dict<K,V>) Set(key <K>, value <V>) {
+	d.Lock()
+	defer d.Unlock()
 
-	h._map[key] = value
+	d._map[key] = value
 }
 
-func (h *Dictionary<K,V>) Get(key <K>) (<V>, bool) {
-	h.RLock()
-	defer h.RUnlock()
+func (d *Dict<K,V>) Get(key <K>) (<V>, bool) {
+	d.RLock()
+	defer d.RUnlock()
 
-	v, exist := h._map[key]
+	v, exist := d._map[key]
 	return v, exist
 }
 
-func (h *Dictionary<K,V>) Count() int {
-	h.RLock()
-	defer h.RUnlock()
+func (d *Dict<K,V>) Len() int {
+	d.RLock()
+	defer d.RUnlock()
 
-	return len(h._map)
+	return len(d._map)
 }
 
-func (h *Dictionary<K,V>) ContainsKey(key <K>) bool {
-	h.RLock()
-	defer h.RUnlock()
+func (d *Dict<K,V>) ContainsKey(key <K>) bool {
+	d.RLock()
+	defer d.RUnlock()
 
-	_, exist := h._map[key]
+	_, exist := d._map[key]
 	return exist
 }
 
-func (h *Dictionary<K,V>) ContainsValue(value <V>) bool {
-	h.RLock()
-	defer h.RUnlock()
+func (d *Dict<K,V>) ContainsValue(value <V>) bool {
+	d.RLock()
+	defer d.RUnlock()
 
-	for _, v := range h._map {
+	for _, v := range d._map {
 		if v == value {
 			return true
 		}
@@ -88,18 +87,31 @@ func (h *Dictionary<K,V>) ContainsValue(value <V>) bool {
 	return false
 }
 
-func (h *Dictionary<K,V>) KeyValuePairs() map[<K>]<V> {
-	h.RLock()
-	defer h.RUnlock()
+func (d *Dict<K,V>) ForEach(fun func(<K>, <V>)) {
+	d.RLock()
+	defer d.RUnlock()
 
-	return h._map
+	for k, v := range d._map {
+		fun(k, v)
+	}
 }
 
-func (h *Dictionary<K,V>) Clear() {
-	h.Lock()
-	defer h.Unlock()
+func (d *Dict<K,V>) KeyValuePairs() map[<K>]<V> {
+	d.RLock()
+	defer d.RUnlock()
 
-	for key, _ := range h._map {
-		delete(h._map, key)
+	ret := make(map[<K>]<V>)
+	for k, v := range d._map {
+		ret[k] = v
+	}
+	return ret
+}
+
+func (d *Dict<K,V>) Clear() {
+	d.Lock()
+	defer d.Unlock()
+
+	for k, _ := range d._map {
+		delete(d._map, k)
 	}
 }

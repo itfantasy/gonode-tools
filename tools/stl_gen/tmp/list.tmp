@@ -1,4 +1,4 @@
-package stl_gen
+package lists
 
 import (
 	"errors"
@@ -83,7 +83,7 @@ func (l *List) Contains(item <T>) bool {
 	return l.IndexOf(item) >= 0
 }
 
-func (l *List) Count() int {
+func (l *List) Len() int {
 	l.RLock()
 	defer l.RUnlock()
 
@@ -97,11 +97,15 @@ func (l *List) Capacity() int {
 	return cap(l.array)
 }
 
-func (l *List) Values() []<T> {
+func (l *List) Items() []<T> {
 	l.RLock()
 	defer l.RUnlock()
 
-	return l.array
+	ret := make([]<T>, 0, len(l.array))
+	for _, item := range l.array {
+		ret = append(ret, item)
+	}
+	return ret
 }
 
 func (l *List) Get(index int) (<T>, error) {
@@ -123,6 +127,15 @@ func (l *List) Set(index int, item <T>) error {
 	}
 	l.array[index] = item
 	return nil
+}
+
+func (l *List) ForEach(fun func(<T>)) {
+	l.RLock()
+	defer l.RUnlock()
+
+	for _, v := range l.array {
+		fun(v)
+	}
 }
 
 func (l *List) Clear() {

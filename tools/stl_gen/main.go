@@ -30,9 +30,9 @@ func main() {
 			return
 		}
 		t := infos[0]
-		txt = strings.Replace(txt, "List<T>", "List"+strs.UcFirst(t), -1)
+		txt = strings.Replace(txt, "List<T>", "List"+getClsName(t), -1)
 		txt = strings.Replace(txt, "<T>", t, -1)
-		fileName := "list" + strs.UcFirst(t) + ".go"
+		fileName := "lists/List" + getClsName(t) + ".go"
 		if err := io.SaveFile(io.CurDir()+"dst/"+fileName, txt); err != nil {
 			fmt.Println(fileName + "created failed! " + err.Error())
 			return
@@ -48,12 +48,19 @@ func main() {
 		v := infos[1]
 		txt = strings.Replace(txt, "<K>", k, -1)
 		txt = strings.Replace(txt, "<V>", v, -1)
-		txt = strings.Replace(txt, "<K,V>", strs.UcFirst(k)+strs.UcFirst(v), -1)
-		fileName := "dict" + strs.UcFirst(k) + strs.UcFirst(v) + ".go"
+		txt = strings.Replace(txt, "<K,V>", getClsName(k)+getClsName(v), -1)
+		fileName := "dicts/Dict" + getClsName(k) + getClsName(v) + ".go"
 		if err := io.SaveFile(io.CurDir()+"dst/"+fileName, txt); err != nil {
 			fmt.Println(fileName + "created failed! " + err.Error())
 			return
 		}
 		fmt.Println(fileName + "has been created!")
 	}
+}
+
+func getClsName(name string) string {
+	infos := strings.Split(name, ".")
+	clsName := infos[len(infos)-1]
+	upper := strs.UcFirst(clsName)
+	return strings.Replace(upper, "*", "", -1)
 }
